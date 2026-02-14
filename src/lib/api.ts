@@ -1,4 +1,6 @@
-const BASE_URL = "https://anime-hindibaapiking.onrender.com";
+import { getApiBaseUrl, trackApiCall } from "./adminStore";
+
+const getBaseUrl = () => getApiBaseUrl();
 
 export interface HomeData {
   "Fresh Drops": AnimeCard[];
@@ -51,25 +53,29 @@ export interface SearchResponse {
 }
 
 export async function fetchHome(): Promise<HomeData> {
-  const res = await fetch(`${BASE_URL}/api/home`);
+  trackApiCall();
+  const res = await fetch(`${getBaseUrl()}/api/home`);
   if (!res.ok) throw new Error("Failed to fetch home data");
   return res.json();
 }
 
 export async function fetchAnimeInfo(slug: string): Promise<AnimeInfo> {
-  const res = await fetch(`${BASE_URL}/api/anime/series/${slug}/`);
+  trackApiCall();
+  const res = await fetch(`${getBaseUrl()}/api/anime/series/${slug}/`);
   if (!res.ok) throw new Error("Failed to fetch anime info");
   return res.json();
 }
 
 export async function fetchStream(slug: string): Promise<StreamData> {
-  const res = await fetch(`${BASE_URL}/api/stream/${slug}/`);
+  trackApiCall();
+  const res = await fetch(`${getBaseUrl()}/api/stream/${slug}/`);
   if (!res.ok) throw new Error("Failed to fetch stream");
   return res.json();
 }
 
 export async function searchAnime(query: string): Promise<SearchResponse> {
-  const res = await fetch(`${BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
+  trackApiCall();
+  const res = await fetch(`${getBaseUrl()}/api/search?q=${encodeURIComponent(query)}`);
   if (!res.ok) throw new Error("Failed to search");
   return res.json();
 }
