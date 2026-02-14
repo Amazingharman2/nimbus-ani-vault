@@ -30,14 +30,7 @@ const WatchPage = () => {
   // Use initial server on first render
   const serverIndex = activeServer === 0 && defaultIndex >= 0 ? defaultIndex : activeServer;
 
-  const serverNames = iframes.map((url, i) => {
-    try {
-      const host = new URL(url).hostname;
-      return `Server ${i + 1} (${host})`;
-    } catch {
-      return `Server ${i + 1}`;
-    }
-  });
+  const serverNames = iframes.map((_, i) => `Server ${i + 1}`);
 
   // Extract anime slug for back link
   const animeSlug = apiSlug.replace(/movies\//, "").replace(/-\d+x\d+$/, "");
@@ -67,6 +60,8 @@ const WatchPage = () => {
                 className="w-full h-full"
                 allowFullScreen
                 allow="autoplay; fullscreen; encrypted-media"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+                referrerPolicy="no-referrer"
                 title="Video Player"
               />
             </div>
