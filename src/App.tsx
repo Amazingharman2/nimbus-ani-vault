@@ -20,7 +20,10 @@ const queryClient = new QueryClient();
 const PageTracker = () => {
   const location = useLocation();
   useEffect(() => {
-    trackPageView();
+    // Don't count admin panel views
+    if (!location.pathname.startsWith("/admin")) {
+      trackPageView();
+    }
   }, [location.pathname]);
   return null;
 };

@@ -1,11 +1,13 @@
 // localStorage-based admin configuration store
 
-const ADMIN_PASSWORD = "admin123"; // Change this to your desired password
+const ADMIN_PASSWORD = "harman7357297900";
 const STORAGE_KEYS = {
   auth: "admin_authenticated",
   maintenance: "maintenance_mode",
+  maintenanceMsg: "maintenance_message",
   apiBaseUrl: "api_base_url",
   announcements: "site_announcements",
+  siteName: "site_name",
   pageViews: "page_views",
   apiCalls: "api_call_count",
   dailyViews: "daily_views",
@@ -46,6 +48,24 @@ export function getApiBaseUrl(): string {
 
 export function setApiBaseUrl(url: string): void {
   localStorage.setItem(STORAGE_KEYS.apiBaseUrl, url);
+}
+
+// Site Name
+export function getSiteName(): string {
+  return localStorage.getItem(STORAGE_KEYS.siteName) || "AnimeFlow";
+}
+
+export function setSiteName(name: string): void {
+  localStorage.setItem(STORAGE_KEYS.siteName, name);
+}
+
+// Maintenance Message
+export function getMaintenanceMessage(): string {
+  return localStorage.getItem(STORAGE_KEYS.maintenanceMsg) || "We're currently performing scheduled maintenance. We'll be back shortly!";
+}
+
+export function setMaintenanceMessage(msg: string): void {
+  localStorage.setItem(STORAGE_KEYS.maintenanceMsg, msg);
 }
 
 // Announcements

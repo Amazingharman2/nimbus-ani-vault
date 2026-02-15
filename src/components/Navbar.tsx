@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
+import { getSiteName } from "@/lib/adminStore";
 
 const Navbar = () => {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const siteName = getSiteName();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +21,7 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 glass-card border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
         <Link to="/" className="font-display text-xl font-bold text-primary tracking-tight flex-shrink-0">
-          Anime<span className="text-accent">Flow</span>
+          {siteName}
         </Link>
 
         {/* Desktop search */}
