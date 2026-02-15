@@ -13,6 +13,10 @@ import {
   getTotalApiCalls,
   getTodayViews,
   resetAnalytics,
+  getSiteName,
+  setSiteName,
+  getMaintenanceMessage,
+  setMaintenanceMessage,
   type Announcement,
 } from "@/lib/adminStore";
 import { Button } from "@/components/ui/button";
@@ -31,6 +35,8 @@ import {
   Eye,
   Activity,
   CalendarDays,
+  Type,
+  MessageSquare,
 } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -42,6 +48,12 @@ const AdminDashboard = () => {
 
   // Maintenance
   const [maintenance, setMaintenance] = useState(isMaintenanceMode());
+  const [maintMsg, setMaintMsg] = useState(getMaintenanceMessage());
+  const [maintMsgSaved, setMaintMsgSaved] = useState(false);
+
+  // Site Name
+  const [name, setName] = useState(getSiteName());
+  const [nameSaved, setNameSaved] = useState(false);
 
   // API URL
   const [apiUrl, setApiUrl] = useState(getApiBaseUrl());
@@ -62,6 +74,18 @@ const AdminDashboard = () => {
     setMaintenanceMode(checked);
   };
 
+  const handleSaveMaintMsg = () => {
+    setMaintenanceMessage(maintMsg);
+    setMaintMsgSaved(true);
+    setTimeout(() => setMaintMsgSaved(false), 2000);
+  };
+
+  const handleSaveName = () => {
+    setSiteName(name);
+    setNameSaved(true);
+    setTimeout(() => setNameSaved(false), 2000);
+  };
+
   const handleSaveApi = () => {
     setApiBaseUrl(apiUrl);
     setApiSaved(true);
@@ -72,13 +96,7 @@ const AdminDashboard = () => {
     if (!newMsg.trim()) return;
     const updated = [
       ...announcements,
-      {
-        id: Date.now().toString(),
-        message: newMsg.trim(),
-        type: newType,
-        active: true,
-        createdAt: new Date().toISOString(),
-      },
+      { id: Date.now().toString(), message: newMsg.trim(), type: newType, active: true, createdAt: new Date().toISOString() },
     ];
     setAnnouncementsState(updated);
     saveAnnouncements(updated);
@@ -86,9 +104,7 @@ const AdminDashboard = () => {
   };
 
   const toggleAnnouncement = (id: string) => {
-    const updated = announcements.map((a) =>
-      a.id === id ? { ...a, active: !a.active } : a
-    );
+    const updated = announcements.map((a) => (a.id === id ? { ...a, active: !a.active } : a));
     setAnnouncementsState(updated);
     saveAnnouncements(updated);
   };
@@ -113,7 +129,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
@@ -169,6 +184,23 @@ const AdminDashboard = () => {
           </Button>
         </div>
 
+        {/* Site Name */}
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Type className="w-4 h-4 text-primary" />
+              Site Name
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your site name" className="bg-background border-border" />
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={handleSaveName}>Save</Button>
+              {nameSaved && <span className="text-xs text-green-400">Saved! Reload to see changes.</span>}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Maintenance Mode */}
         <Card className="bg-card border-border">
           <CardHeader className="pb-3">
@@ -177,11 +209,23 @@ const AdminDashboard = () => {
               Maintenance Mode
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {maintenance ? "Site is in maintenance mode — visitors see a maintenance page." : "Site is live and accessible."}
-            </p>
-            <Switch checked={maintenance} onCheckedChange={handleMaintenanceToggle} />
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {maintenance ? "Site is in maintenance mode." : "Site is live and accessible."}
+              </p>
+              <Switch checked={maintenance} onCheckedChange={handleMaintenanceToggle} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-muted-foreground flex items-center gap-1">
+                <MessageSquare className="w-3 h-3" /> Maintenance Message
+              </label>
+              <Input value={maintMsg} onChange={(e) => setMaintMsg(e.target.value)} placeholder="Custom maintenance message..." className="bg-background border-border" />
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={handleSaveMaintMsg}>Save Message</Button>
+                {maintMsgSaved && <span className="text-xs text-green-400">Saved!</span>}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -194,12 +238,7 @@ const AdminDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Input
-              value={apiUrl}
-              onChange={(e) => setApiUrl(e.target.value)}
-              placeholder="https://your-api.com"
-              className="bg-background border-border"
-            />
+            <Input value={apiUrl} onChange={(e) => setApiUrl(e.target.value)} placeholder="https://your-api.com" className="bg-background border-border" />
             <div className="flex items-center gap-2">
               <Button size="sm" onClick={handleSaveApi}>Save</Button>
               {apiSaved && <span className="text-xs text-green-400">Saved! Reload to apply.</span>}
@@ -216,63 +255,29 @@ const AdminDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Add new */}
             <div className="flex gap-2">
-              <Input
-                value={newMsg}
-                onChange={(e) => setNewMsg(e.target.value)}
-                placeholder="Type announcement..."
-                className="bg-background border-border flex-1"
-                onKeyDown={(e) => e.key === "Enter" && handleAddAnnouncement()}
-              />
-              <select
-                value={newType}
-                onChange={(e) => setNewType(e.target.value as "info" | "warning" | "success")}
-                className="bg-background border border-border rounded-md px-2 text-sm text-foreground"
-              >
+              <Input value={newMsg} onChange={(e) => setNewMsg(e.target.value)} placeholder="Type announcement..." className="bg-background border-border flex-1" onKeyDown={(e) => e.key === "Enter" && handleAddAnnouncement()} />
+              <select value={newType} onChange={(e) => setNewType(e.target.value as "info" | "warning" | "success")} className="bg-background border border-border rounded-md px-2 text-sm text-foreground">
                 <option value="info">Info</option>
                 <option value="warning">Warning</option>
                 <option value="success">Success</option>
               </select>
-              <Button size="sm" onClick={handleAddAnnouncement}>
-                <Plus className="w-4 h-4" />
-              </Button>
+              <Button size="sm" onClick={handleAddAnnouncement}><Plus className="w-4 h-4" /></Button>
             </div>
-
-            {/* List */}
-            {announcements.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">No announcements yet.</p>
-            )}
+            {announcements.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No announcements yet.</p>}
             <div className="space-y-2">
               {announcements.map((a) => (
-                <div
-                  key={a.id}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${
-                    a.active ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30 opacity-60"
-                  }`}
-                >
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                    a.type === "info" ? "bg-primary/20 text-primary" :
-                    a.type === "warning" ? "bg-yellow-500/20 text-yellow-400" :
-                    "bg-green-500/20 text-green-400"
-                  }`}>
-                    {a.type}
-                  </span>
+                <div key={a.id} className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${a.active ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30 opacity-60"}`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${a.type === "info" ? "bg-primary/20 text-primary" : a.type === "warning" ? "bg-yellow-500/20 text-yellow-400" : "bg-green-500/20 text-green-400"}`}>{a.type}</span>
                   <span className="flex-1 text-sm text-foreground">{a.message}</span>
-                  <Switch
-                    checked={a.active}
-                    onCheckedChange={() => toggleAnnouncement(a.id)}
-                  />
-                  <button onClick={() => deleteAnnouncement(a.id)} className="text-muted-foreground hover:text-destructive transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <Switch checked={a.active} onCheckedChange={() => toggleAnnouncement(a.id)} />
+                  <button onClick={() => deleteAnnouncement(a.id)} className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Stats */}
         <Card className="bg-card border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -281,9 +286,7 @@ const AdminDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">
-              ⚠️ Analytics are localStorage-based (tracked per device). For accurate multi-user tracking, a backend database is needed.
-            </p>
+            <p className="text-xs text-muted-foreground">⚠️ Analytics are localStorage-based (tracked per device). Admin pages are excluded from tracking.</p>
           </CardContent>
         </Card>
       </main>
